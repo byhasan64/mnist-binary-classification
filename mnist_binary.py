@@ -23,6 +23,7 @@ y = y.astype(np.uint8)
 print(f"X shape: {X.shape}")
 print(f"y shape: {y.shape}")
 
+# Visualise the first sample
 some_digit = X.iloc[0].to_numpy()
 plt.imshow(some_digit.reshape(28, 28), cmap="binary")
 plt.axis("off")
@@ -37,6 +38,7 @@ plt.show()
 X_train, X_test = X[:60000], X[60000:]
 y_train, y_test = y[:60000], y[60000:]
 
+# Binary target: True if digit is 5
 y_train_5 = (y_train == 5)
 y_test_5  = (y_test  == 5)
 
@@ -73,6 +75,8 @@ for train_index, test_index in skfolds.split(X_train, y_train_5):
 
 # =============================================================================
 # 5. Why Accuracy Alone Is Misleading
+# Only ~10% of images are 5s, so a classifier that always predicts "not 5"
+# achieves >90% accuracy — without learning anything useful.
 # =============================================================================
 
 class Never5Classifier(BaseEstimator):
@@ -97,6 +101,8 @@ print(f"F1        : {f1_score(y_train_5, y_train_pred):.4f}")
 
 # =============================================================================
 # 7. Threshold Tuning via Decision Function
+# predict() is equivalent to decision_function() with threshold = 0.
+# Raising the threshold increases precision but lowers recall.
 # =============================================================================
 
 y_scores = sgd_clf.decision_function([some_digit])
@@ -106,4 +112,5 @@ for threshold in [0, 8000]:
     pred = (y_scores > threshold)
     print(f"Threshold {threshold:>5}: predicted as 5? {pred[0]}")
 
+# Collect scores across all training folds for plotting
 y_scores_train = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method="decision_function")
